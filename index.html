@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Structures Quiz</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --error: #f72585;
+            --warning: #f8961e;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark), #16213e);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 900px;
+            padding: 2.5rem;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .score-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .score-icon {
+            color: var(--accent);
+        }
+
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.6s ease;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        .question-container {
+            margin-bottom: 2.5rem;
+        }
+
+        .question-number {
+            font-size: 0.9rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+
+        .question {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .option-letter {
+            background: rgba(255, 255, 255, 0.1);
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .option.correct {
+            background: rgba(76, 201, 240, 0.15);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .option.correct .option-letter {
+            background: var(--success);
+            color: var(--dark);
+        }
+
+        .option.wrong {
+            background: rgba(247, 37, 133, 0.15);
+            border-color: var(--error);
+            color: white;
+        }
+
+        .option.wrong .option-letter {
+            background: var(--error);
+            color: white;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+        }
+
+        .result-container {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+
+        .result-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .result-score {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .result-text {
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .restart-btn {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            margin: 0 auto;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 1.5rem;
+            }
+            
+            .title {
+                font-size: 1.5rem;
+            }
+            
+            .question {
+                font-size: 1.3rem;
+            }
+            
+            .option {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+            
+            .btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .controls {
+                flex-direction: column-reverse;
+                gap: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1 class="title">Data Structures Quiz</h1>
+            <div class="score-container">
+                <i class="fas fa-star score-icon"></i>
+                <span id="score">0</span> / <span id="total-questions">50</span>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div id="quiz-content">
+            <div class="question-container">
+                <div class="question-number" id="question-number">Question 1 of 50</div>
+                <div class="question" id="question"></div>
+                <div class="options-container" id="options-container"></div>
+            </div>
+            <div class="controls">
+                <div id="feedback" style="color: var(--accent); font-weight: 500;"></div>
+                <button class="btn" id="next-btn" disabled>
+                    <span>Next Question</span>
+                    <i class="fas fa-arrow-right btn-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="result-container" class="result-container">
+            <i class="fas fa-trophy result-icon pulse"></i>
+            <h2 class="result-title">Quiz Completed!</h2>
+            <div class="result-score">Your Score: <span id="final-score">0</span> out of <span id="total-questions-final">50</span></div>
+            <p class="result-text" id="result-text"></p>
+            <button class="restart-btn" id="restart-btn">
+                <i class="fas fa-redo"></i> Restart Quiz
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const questionElement = document.getElementById('question');
+            const questionNumberElement = document.getElementById('question-number');
+            const optionsContainer = document.getElementById('options-container');
+            const nextButton = document.getElementById('next-btn');
+            const scoreElement = document.getElementById('score');
+            const totalQuestionsElement = document.getElementById('total-questions');
+            const finalScoreElement = document.getElementById('final-score');
+            const totalQuestionsFinalElement = document.getElementById('total-questions-final');
+            const quizContent = document.getElementById('quiz-content');
+            const resultContainer = document.getElementById('result-container');
+            const restartButton = document.getElementById('restart-btn');
+            const progressBar = document.getElementById('progress-bar');
+            const feedbackElement = document.getElementById('feedback');
+            const resultTextElement = document.getElementById('result-text');
+
+            // Quiz Variables
+            let currentQuestionIndex = 0;
+            let score = 0;
+            let selectedOption = null;
+            let questions = [];
+            const letters = ['A', 'B', 'C', 'D'];
+
+            // Initialize the quiz
+            function initQuiz() {
+                questions = getDataStructureQuestions();
+                totalQuestionsElement.textContent = questions.length;
+                totalQuestionsFinalElement.textContent = questions.length;
+                showQuestion();
+            }
+
+            // Display the current question
+            function showQuestion() {
+                resetState();
+                const currentQuestion = questions[currentQuestionIndex];
+                const questionNo = currentQuestionIndex + 1;
+                
+                // Update progress
+                progressBar.style.width = `${(questionNo / questions.length) * 100}%`;
+                questionNumberElement.textContent = `Question ${questionNo} of ${questions.length}`;
+                
+                questionElement.textContent = currentQuestion.question;
+                
+                currentQuestion.options.forEach((option, index) => {
+                    const optionElement = document.createElement('div');
+                    optionElement.classList.add('option', 'fade-in');
+                    optionElement.innerHTML = `
+                        <div class="option-letter">${letters[index]}</div>
+                        <div class="option-text">${option.text}</div>
+                    `;
+                    optionElement.addEventListener('click', () => selectOption(option, optionElement));
+                    optionsContainer.appendChild(optionElement);
+                });
+            }
+
+            // Reset the quiz state for the next question
+            function resetState() {
+                selectedOption = null;
+                nextButton.disabled = true;
+                feedbackElement.textContent = '';
+                while (optionsContainer.firstChild) {
+                    optionsContainer.removeChild(optionsContainer.firstChild);
+                }
+            }
+
+            // Handle option selection
+            function selectOption(option, button) {
+                if (selectedOption) return;
+                
+                selectedOption = option;
+                const isCorrect = option.correct;
+                
+                if (isCorrect) {
+                    button.classList.add('correct');
+                    score++;
+                    scoreElement.textContent = score;
+                    feedbackElement.textContent = 'Correct!';
+                    feedbackElement.style.color = 'var(--success)';
+                } else {
+                    button.classList.add('wrong');
+                    feedbackElement.textContent = 'Incorrect!';
+                    feedbackElement.style.color = 'var(--error)';
+                    
+                    // Highlight the correct answer
+                    const options = optionsContainer.children;
+                    for (let i = 0; i < options.length; i++) {
+                        if (questions[currentQuestionIndex].options[i].correct) {
+                            options[i].classList.add('correct');
+                            break;
+                        }
+                    }
+                }
+                
+                // Disable all options after selection
+                const options = optionsContainer.children;
+                for (let i = 0; i < options.length; i++) {
+                    options[i].classList.add('disabled');
+                }
+                
+                nextButton.disabled = false;
+            }
+
+            // Show the final results
+            function showResults() {
+                quizContent.style.display = 'none';
+                resultContainer.style.display = 'block';
+                finalScoreElement.textContent = score;
+                
+                // Custom result message based on score
+                const percentage = (score / questions.length) * 100;
+                let message = '';
+                
+                if (percentage >= 90) {
+                    message = 'Outstanding! You have mastered the fundamentals of Data Structures.';
+                } else if (percentage >= 70) {
+                    message = 'Great job! You have a strong understanding of Data Structures.';
+                } else if (percentage >= 50) {
+                    message = 'Good effort! Review the topics you missed to improve.';
+                } else {
+                    message = 'Keep practicing! Review the basics and try again.';
+                }
+                
+                resultTextElement.textContent = message;
+            }
+
+            // Move to the next question or show results
+            function handleNextButton() {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    showQuestion();
+                } else {
+                    showResults();
+                }
+            }
+
+            // Event Listeners
+            nextButton.addEventListener('click', handleNextButton);
+            restartButton.addEventListener('click', () => {
+                currentQuestionIndex = 0;
+                score = 0;
+                scoreElement.textContent = score;
+                quizContent.style.display = 'block';
+                resultContainer.style.display = 'none';
+                showQuestion();
+            });
+
+            // Start the quiz
+            initQuiz();
+
+            // Data Structures Questions
+            function getDataStructureQuestions() {
+                return [
+                    // Basic Terminology (10 questions)
+                    {
+                        question: "Which of the following best defines a data structure?",
+                        options: [
+                            { text: "A way to organize and store data for efficient access and modification", correct: true },
+                            { text: "A collection of algorithms for solving problems", correct: false },
+                            { text: "A type of computer hardware component", correct: false },
+                            { text: "A programming language syntax", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the most elementary data organization method?",
+                        options: [
+                            { text: "Arrays", correct: true },
+                            { text: "Linked Lists", correct: false },
+                            { text: "Trees", correct: false },
+                            { text: "Graphs", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which of these is NOT a classification of data structures?",
+                        options: [
+                            { text: "Linear data structures", correct: false },
+                            { text: "Non-linear data structures", correct: false },
+                            { text: "Primitive data structures", correct: false },
+                            { text: "Looping data structures", correct: true }
+                        ]
+                    },
+                    {
+                        question: "What is the time complexity of accessing an element in an array by index?",
+                        options: [
+                            { text: "O(1)", correct: true },
+                            { text: "O(n)", correct: false },
+                            { text: "O(log n)", correct: false },
+                            { text: "O(n log n)", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which operation is NOT typically performed on data structures?",
+                        options: [
+                            { text: "Traversal", correct: false },
+                            { text: "Insertion", correct: false },
+                            { text: "Deletion", correct: false },
+                            { text: "Compilation", correct: true }
+                        ]
+                    },
+                    {
+                        question: "What is the main characteristic of a primitive data structure?",
+                        options: [
+                            { text: "They are predefined by the programming language", correct: true },
+                            { text: "They can store large amounts of data", correct: false },
+                            { text: "They use pointers for implementation", correct: false },
+                            { text: "They are always linear", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which of these is an example of a non-primitive data structure?",
+                        options: [
+                            { text: "Integer", correct: false },
+                            { text: "Float", correct: false },
+                            { text: "Array", correct: true },
+                            { text: "Character", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the primary purpose of data structures?",
+                        options: [
+                            { text: "To make code more readable", correct: false },
+                            { text: "To efficiently organize and manage data", correct: true },
+                            { text: "To reduce the need for algorithms", correct: false },
+                            { text: "To improve hardware performance", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which of these is NOT a linear data structure?",
+                        options: [
+                            { text: "Array", correct: false },
+                            { text: "Linked List", correct: false },
+                            { text: "Stack", correct: false },
+                            { text: "Tree", correct: true }
+                        ]
+                    },
+                    {
+                        question: "What is the most basic operation that can be performed on a data structure?",
+                        options: [
+                            { text: "Traversal", correct: true },
+                            { text: "Sorting", correct: false },
+                            { text: "Searching", correct: false },
+                            { text: "Merging", correct: false }
+                        ]
+                    },
+
+                    // Arrays and Multidimensional Arrays (15 questions)
+                    {
+                        question: "How is a two-dimensional array stored in memory?",
+                        options: [
+                            { text: "Row-major order", correct: true },
+                            { text: "Column-major order", correct: false },
+                            { text: "Random order", correct: false },
+                            { text: "Diagonal order", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the formula to calculate the index of a 2D array element arr[i][j] in row-major order?",
+                        options: [
+                            { text: "i * columns + j", correct: true },
+                            { text: "j * rows + i", correct: false },
+                            { text: "i * rows + j", correct: false },
+                            { text: "j * columns + i", correct: false }
+                        ]
+                    },
+                    {
+                        question: "In a three-dimensional array arr[x][y][z], how many elements are there in total?",
+                        options: [
+                            { text: "x + y + z", correct: false },
+                            { text: "x * y * z", correct: true },
+                            { text: "x(y + z)", correct: false },
+                            { text: "(x + y)z", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is a sparse array?",
+                        options: [
+                            { text: "An array with mostly zero values", correct: true },
+                            { text: "An array with missing indices", correct: false },
+                            { text: "An array with duplicate values", correct: false },
+                            { text: "An array with negative indices", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which of these is NOT a type of sparse matrix?",
+                        options: [
+                            { text: "Diagonal matrix", correct: false },
+                            { text: "Lower triangular matrix", correct: false },
+                            { text: "Upper triangular matrix", correct: false },
+                            { text: "Rectangular matrix", correct: true }
+                        ]
+                    },
+                    {
+                        question: "How many non-zero elements are in an n×n lower triangular matrix?",
+                        options: [
+                            { text: "n", correct: false },
+                            { text: "n²", correct: false },
+                            { text: "n(n+1)/2", correct: true },
+                            { text: "n(n-1)/2", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the main advantage of using a special representation for sparse matrices?",
+                        options: [
+                            { text: "Faster access to elements", correct: false },
+                            { text: "Reduced memory usage", correct: true },
+                            { text: "Easier to program", correct: false },
+                            { text: "Better cache performance", correct: false }
+                        ]
+                    },
+                    {
+                        question: "In a tridiagonal matrix, non-zero elements appear:",
+                        options: [
+                            { text: "Only on the main diagonal", correct: false },
+                            { text: "On the main diagonal and one diagonal above and below it", correct: true },
+                            { text: "Randomly throughout the matrix", correct: false },
+                            { text: "In the first and last rows only", correct: false }
+                        ]
+                    },
+                    {
+                        question: "When adding two sparse matrices, what is the time complexity?",
+                        options: [
+                            { text: "O(1)", correct: false },
+                            { text: "O(n)", correct: true },
+                            { text: "O(n²)", correct: false },
+                            { text: "O(n³)", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which representation is commonly used for sparse matrices?",
+                        options: [
+                            { text: "Linked list", correct: false },
+                            { text: "Three-column representation", correct: true },
+                            { text: "Binary tree", correct: false },
+                            { text: "Circular queue", correct: false }
+                        ]
+                    },
+                    {
+                        question: "For a 3D array declared as int arr[2][3][4], what is the total size in bytes (assuming int is 4 bytes)?",
+                        options: [
+                            { text: "24", correct: false },
+                            { text: "48", correct: false },
+                            { text: "96", correct: true },
+                            { text: "192", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the main disadvantage of multidimensional arrays?",
+                        options: [
+                            { text: "They can't store different data types", correct: false },
+                            { text: "They require contiguous memory allocation", correct: true },
+                            { text: "They are difficult to implement", correct: false },
+                            { text: "They have slow access times", correct: false }
+                        ]
+                    },
+                    {
+                        question: "In row-major order, how are elements of a 2D array arranged in memory?",
+                        options: [
+                            { text: "First row followed by second row, etc.", correct: true },
+                            { text: "First column followed by second column, etc.", correct: false },
+                            { text: "Alternating rows and columns", correct: false },
+                            { text: "In order of diagonal elements", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the space complexity of storing an n×n dense matrix?",
+                        options: [
+                            { text: "O(1)", correct: false },
+                            { text: "O(n)", correct: false },
+                            { text: "O(n²)", correct: true },
+                            { text: "O(log n)", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which of these operations is most efficient on a sparse matrix represented in three-column form?",
+                        options: [
+                            { text: "Random access to any element", correct: false },
+                            { text: "Finding the transpose", correct: true },
+                            { text: "Matrix multiplication", correct: false },
+                            { text: "Calculating the determinant", correct: false }
+                        ]
+                    },
+
+                    // Sorting Techniques (10 questions)
+                    {
+                        question: "What is the time complexity of insertion sort in the worst case?",
+                        options: [
+                            { text: "O(n)", correct: false },
+                            { text: "O(n log n)", correct: false },
+                            { text: "O(n²)", correct: true },
+                            { text: "O(log n)", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which sorting algorithm works by repeatedly finding the minimum element?",
+                        options: [
+                            { text: "Insertion sort", correct: false },
+                            { text: "Selection sort", correct: true },
+                            { text: "Merge sort", correct: false },
+                            { text: "Quick sort", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the main advantage of merge sort?",
+                        options: [
+                            { text: "It has O(n) time complexity", correct: false },
+                            { text: "It is an in-place sorting algorithm", correct: false },
+                            { text: "It has O(n log n) time complexity in all cases", correct: true },
+                            { text: "It requires no additional memory", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which sorting algorithm is most efficient for small datasets?",
+                        options: [
+                            { text: "Merge sort", correct: false },
+                            { text: "Insertion sort", correct: true },
+                            { text: "Quick sort", correct: false },
+                            { text: "Heap sort", correct: false }
+                        ]
+                    },
+                    {
+                        question: "In selection sort, how many swaps are needed in the worst case for n elements?",
+                        options: [
+                            { text: "0", correct: false },
+                            { text: "n", correct: false },
+                            { text: "n-1", correct: true },
+                            { text: "n²", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which of these is NOT a stable sorting algorithm?",
+                        options: [
+                            { text: "Insertion sort", correct: false },
+                            { text: "Merge sort", correct: false },
+                            { text: "Selection sort", correct: true },
+                            { text: "Bubble sort", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the best case time complexity of insertion sort?",
+                        options: [
+                            { text: "O(n)", correct: true },
+                            { text: "O(n log n)", correct: false },
+                            { text: "O(n²)", correct: false },
+                            { text: "O(log n)", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which sorting algorithm divides the array into sorted and unsorted parts?",
+                        options: [
+                            { text: "Merge sort", correct: false },
+                            { text: "Quick sort", correct: false },
+                            { text: "Insertion sort", correct: true },
+                            { text: "Heap sort", correct: false }
+                        ]
+                    },
+                    {
+                        question: "In merge sort, what is the time complexity of the merge operation?",
+                        options: [
+                            { text: "O(1)", correct: false },
+                            { text: "O(n)", correct: true },
+                            { text: "O(log n)", correct: false },
+                            { text: "O(n log n)", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which sorting algorithm is based on the divide-and-conquer approach?",
+                        options: [
+                            { text: "Insertion sort", correct: false },
+                            { text: "Selection sort", correct: false },
+                            { text: "Merge sort", correct: true },
+                            { text: "Bubble sort", correct: false }
+                        ]
+                    },
+
+                    // Searching Techniques (15 questions)
+                    {
+                        question: "What is the time complexity of linear search?",
+                        options: [
+                            { text: "O(1)", correct: false },
+                            { text: "O(log n)", correct: false },
+                            { text: "O(n)", correct: true },
+                            { text: "O(n log n)", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Binary search requires the data to be:",
+                        options: [
+                            { text: "Unsorted", correct: false },
+                            { text: "Sorted", correct: true },
+                            { text: "In a linked list", correct: false },
+                            { text: "In a tree structure", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the time complexity of binary search in the worst case?",
+                        options: [
+                            { text: "O(1)", correct: false },
+                            { text: "O(log n)", correct: true },
+                            { text: "O(n)", correct: false },
+                            { text: "O(n log n)", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which searching technique is most efficient for large sorted arrays?",
+                        options: [
+                            { text: "Linear search", correct: false },
+                            { text: "Binary search", correct: true },
+                            { text: "Jump search", correct: false },
+                            { text: "Interpolation search", correct: false }
+                        ]
+                    },
+                    {
+                        question: "In hashing, what is a collision?",
+                        options: [
+                            { text: "When two different keys map to the same hash value", correct: true },
+                            { text: "When the hash table is full", correct: false },
+                            { text: "When a key cannot be found", correct: false },
+                            { text: "When the hash function is too complex", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which of these is NOT a collision resolution technique?",
+                        options: [
+                            { text: "Chaining", correct: false },
+                            { text: "Linear probing", correct: false },
+                            { text: "Quadratic probing", correct: false },
+                            { text: "Binary probing", correct: true }
+                        ]
+                    },
+                    {
+                        question: "What is the best case time complexity of linear search?",
+                        options: [
+                            { text: "O(1)", correct: true },
+                            { text: "O(log n)", correct: false },
+                            { text: "O(n)", correct: false },
+                            { text: "O(n log n)", correct: false }
+                        ]
+                    },
+                    {
+                        question: "In binary search, how many comparisons are needed for an array of size 1024 in the worst case?",
+                        options: [
+                            { text: "10", correct: true },
+                            { text: "100", correct: false },
+                            { text: "512", correct: false },
+                            { text: "1024", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which of these is a perfect hash function?",
+                        options: [
+                            { text: "One that never produces collisions", correct: true },
+                            { text: "One that uses prime numbers", correct: false },
+                            { text: "One that is very complex", correct: false },
+                            { text: "One that works only with strings", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the main advantage of hashing over binary search?",
+                        options: [
+                            { text: "It doesn't require sorted data", correct: false },
+                            { text: "It can achieve O(1) average case time complexity", correct: true },
+                            { text: "It uses less memory", correct: false },
+                            { text: "It's easier to implement", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which of these is NOT a property of a good hash function?",
+                        options: [
+                            { text: "Uniform distribution of hash values", correct: false },
+                            { text: "Deterministic (same input gives same output)", correct: false },
+                            { text: "Fast to compute", correct: false },
+                            { text: "Always produces unique hash values", correct: true }
+                        ]
+                    },
+                    {
+                        question: "What is the load factor in hashing?",
+                        options: [
+                            { text: "Number of slots / Number of keys", correct: false },
+                            { text: "Number of keys / Number of slots", correct: true },
+                            { text: "Number of collisions / Number of keys", correct: false },
+                            { text: "Size of keys / Size of slots", correct: false }
+                        ]
+                    },
+                    {
+                        question: "In linear probing, what happens when a collision occurs?",
+                        options: [
+                            { text: "The key is stored in a linked list", correct: false },
+                            { text: "The next empty slot is found by sequential search", correct: true },
+                            { text: "The hash function is recomputed", correct: false },
+                            { text: "The table size is doubled", correct: false }
+                        ]
+                    },
+                    {
+                        question: "Which searching method would you use for an unsorted linked list?",
+                        options: [
+                            { text: "Binary search", correct: false },
+                            { text: "Hashing", correct: false },
+                            { text: "Linear search", correct: true },
+                            { text: "Jump search", correct: false }
+                        ]
+                    },
+                    {
+                        question: "What is the space complexity of hashing with chaining?",
+                        options: [
+                            { text: "O(1)", correct: false },
+                            { text: "O(n)", correct: true },
+                            { text: "O(n²)", correct: false },
+                            { text: "O(log n)", correct: false }
+                        ]
+                    }
+                ];
+            }
+        });
+    </script>
+</body>
+</html>
